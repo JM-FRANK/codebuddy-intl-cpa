@@ -78,6 +78,9 @@ var hardCreditMarkers = []string{
 // isHardCreditError reports business "out of credits" style failures.
 // 402 is treated as payment/credit. Pure 429 is not hard unless body has credit markers.
 func isHardCreditError(status int, body string) bool {
+	if upstreamErrorCode(body) == channelVerificationCode {
+		return false
+	}
 	if status == httpStatusPaymentRequired {
 		return true
 	}

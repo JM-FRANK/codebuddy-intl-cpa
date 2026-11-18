@@ -24,6 +24,8 @@ import (
 )
 
 const (
+	channelVerificationCode = "11128"
+
 	// riskControlCode is the upstream code for "this account may not generate".
 	// Distinct from 11128 (channel/prompt mismatch) and 14018 (credits).
 	riskControlCode = "11140"
@@ -177,12 +179,15 @@ func uniqueNonEmptyKeys(keys []string) []string {
 // treated as "skip this account, try the next one" (like a rate limit), while
 // markCandidateUnavailable gives it its own long cooldown and warning.
 func classifyAccountFailure(status int, body string) attemptOutcome {
+	code := upstreamErrorCode(body)
 	switch {
+	case code == channelVerificationCode:
+		return outcomeStop
 	case isAccountExhaustedResponse(status, body):
 		return outcomeAccountExhausted
 	case isRiskControlResponse(status, body):
 		return outcomeRateLimited
-	case upstreamErrorCode(body) == modelNotAllowedCode:
+	case code == modelNotAllowedCode:
 		return outcomeModelNotAllowed
 	case isRateLimitResponse(status, body):
 		return outcomeRateLimited

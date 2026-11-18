@@ -162,14 +162,15 @@ func isAccountExhaustedResponse(statusCode int, body string) bool {
 // "frequency limit" / "rate limit" wording in the body. Hard credit errors
 // (402/insufficient credit) never trigger failover.
 func isRateLimitResponse(statusCode int, body string) bool {
-	if isHardCreditError(statusCode, body) {
+	code := upstreamErrorCode(body)
+	if code == channelVerificationCode || isHardCreditError(statusCode, body) {
 		return false
 	}
 	if statusCode == 429 {
 		return true
 	}
 	lower := strings.ToLower(body)
-	return strings.Contains(lower, "6004") ||
+	return code == "6004" ||
 		strings.Contains(lower, "frequency limit") ||
 		strings.Contains(lower, "rate limit") ||
 		strings.Contains(lower, "too many requests")

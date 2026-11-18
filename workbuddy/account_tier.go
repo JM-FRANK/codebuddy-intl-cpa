@@ -41,12 +41,12 @@ type accountTierRec struct {
 }
 
 // upstreamCodeRe extracts the business code from an upstream error envelope.
-var upstreamCodeRe = regexp.MustCompile(`"code"\s*:\s*(\d+)`)
+var upstreamCodeRe = regexp.MustCompile(`"code"\s*:\s*(?:"([0-9]+)"|([0-9]+)(?:[\s,}]|$))`)
 
 // upstreamErrorCode returns the business code in an upstream body, "" if absent.
 func upstreamErrorCode(body string) string {
-	if m := upstreamCodeRe.FindStringSubmatch(body); len(m) == 2 {
-		return m[1]
+	if m := upstreamCodeRe.FindStringSubmatch(body); m != nil {
+		return m[1] + m[2]
 	}
 	return ""
 }

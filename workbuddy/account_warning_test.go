@@ -41,6 +41,8 @@ func TestClassifyAccountFailure(t *testing.T) {
 		{"risk control fails over", 403, `{"code":11140,"msg":"request illegal"}`, outcomeRateLimited},
 		{"exhaustion is its own outcome", 403, `{"code":14018,"msg":"Credits exhausted"}`, outcomeAccountExhausted},
 		{"rate limit fails over", 429, `{"code":6004}`, outcomeRateLimited},
+		{"channel rejection overrides a generic rate limit status", 429, `{"error":{"code":"11128","msg":"request illegal"}}`, outcomeStop},
+		{"channel rejection overrides credit wording", 403, `{"code":11128,"msg":"insufficient credit"}`, outcomeStop},
 		{"plain upstream error stops", 400, `{"code":1234,"msg":"bad request"}`, outcomeStop},
 	}
 	for _, tc := range cases {
